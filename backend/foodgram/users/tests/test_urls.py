@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from rest_framework import status
+
 User = get_user_model()
 
 USER1_DATA = {
@@ -51,7 +52,7 @@ class TestTokenURL(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TestUsersURLs(TestCase):
+class TestUsersFeature(TestCase):
     def setUp(self):
         self.guest_client = Client()
         authorized_client = Client()
