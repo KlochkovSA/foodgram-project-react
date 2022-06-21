@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
 from .models import Follow
@@ -6,10 +7,10 @@ from .models import Follow
 User = get_user_model()
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class RegisterUserSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name')
+        fields = ('email', 'username', 'first_name', 'last_name', 'password')
 
 
 class UserGetSerializer(serializers.ModelSerializer):
