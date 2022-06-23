@@ -11,7 +11,8 @@ SECRET_KEY = os.getenv('DJANGO_KEY',
                                ')dd3@($9a_rg8*f87jj$6w!h-5)#1kfw^_y!q7+j')
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+IP = os.getenv('HOST', default='')
+ALLOWED_HOSTS = [IP, 'klochkovsa.sytes.net']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

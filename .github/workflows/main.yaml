@@ -47,3 +47,57 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram:v1
           file: ./backend/foodgram/Dockerfile
+
+      - name: Tar frontend build results
+        run: tar -cvf deploy.tar /frontend/build /docs /infra/docker-compose.yml /infra/nginx.conf
+      - name: Upload Frontend and configs
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: deploy.tar
+          if-no-files-found: error
+      - name: send_tar to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+           username: ${{ secrets.USER }}
+           key: ${{ secrets.SSH_KEY }}
+           passphrase: ${{ secrets.PASSPHRASE }}
+           source: "deploy.tar"
+           target: "~"
+           overwrite: true
+  deploy:
+      runs-on: ubuntu-latest
+      needs: build_and_push_to_docker_hub
+      if: github.ref == 'refs/heads/master'
+      steps:
+        - name: executing remote ssh commands to deploy
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USER }}
+            key: ${{ secrets.SSH_KEY }}
+            passphrase: ${{ secrets.PASSPHRASE }}
+            script: |
+              
+              sudo docker compose stop
+              sudo docker compose rm {{ secrets.DOCKER_USERNAME }}/api_yamdb:v1
+              sudo docker volume prune
+              
+              rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
+              
+              
+              tar -xvf deploy.tar
+              sudo docker pull ${{ secrets.DOCKER_USERNAME }}/api_yamdb:v1
+              touch .env
+              echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+              echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+              echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+              echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+              echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+              echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+              echo DJANGO_KEY=${{ secrets.DJANGO_KEY }} >> .env
+              echo HOST=${{ secrets.HOST }} >> .env
+              sudo docker compose up -d
+              sudo docker compose exec web python manage.py migrate
+              sudo docker compose exec web python manage.py collectstatic --no-input
