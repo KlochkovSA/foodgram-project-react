@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from rest_framework import status
 
 User = get_user_model()
@@ -20,10 +20,9 @@ def create_fixtures():
                                     first_name=USER1_DATA['first_name'],
                                     last_name=USER1_DATA['last_name'],
                                     password=USER1_DATA['password'])
-    fixtures = {
+    return {
         'user1': user,
     }
-    return fixtures
 
 
 class TestTokenURL(TestCase):
@@ -33,7 +32,7 @@ class TestTokenURL(TestCase):
         self.fixtures = create_fixtures()
         self.authorized_client.force_login(user=self.fixtures['user1'])
 
-    def testGetToken(self):
+    def test_get_token(self):
         data = {
             'password': USER1_DATA['password'],
             'email': USER1_DATA['email']
@@ -41,14 +40,15 @@ class TestTokenURL(TestCase):
         response = self.guest_client.post('/api/auth/token/login/', data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def testDeleteToken(self):
+    def test_delete_token(self):
         data = {
             'password': USER1_DATA['password'],
             'email': USER1_DATA['email']
         }
         response = self.guest_client.post('/api/auth/token/login/', data=data)
         token = response.data['auth_token']
-        response = self.guest_client.post('/api/auth/token/logout/', HTTP_AUTHORIZATION=f'Token {token}')
+        response = self.guest_client.post('/api/auth/token/logout/',
+                                          HTTP_AUTHORIZATION=f'Token {token}')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
@@ -66,18 +66,18 @@ class TestUsersFeature(TestCase):
 
         self.authorized_client = Client(HTTP_AUTHORIZATION=f'Token {token}')
 
-    def testGetUsers(self):
+    def test_get_users(self):
         response = self.guest_client.get('/api/users/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def testGetPersonalProfile(self):
+    def test_get_personal_profile(self):
         response = self.guest_client.get('/api/users/me/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         response = self.authorized_client.get('/api/users/me/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def testGetProfile(self):
+    def test_get_profile(self):
         id = self.fixtures['user1'].id
         profile_url = f'/api/users/{id}/'
         response = self.guest_client.get(profile_url)
@@ -86,7 +86,7 @@ class TestUsersFeature(TestCase):
         response = self.authorized_client.get(profile_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def testChangePassword(self):
+    def test_change_password(self):
         url = '/api/users/set_password/'
         data = {'new_password': '12dfssdfdsfdsds3',
                 'current_password': USER1_DATA['password']}

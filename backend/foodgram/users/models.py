@@ -16,6 +16,7 @@ class Follow(models.Model):
                                verbose_name='Автор',
                                on_delete=models.CASCADE
                                )
+    created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.author == self.user:
@@ -30,3 +31,4 @@ class Follow(models.Model):
                 name='no_self_subscription'
             ),
         ]
+        ordering = ['-created']
