@@ -35,6 +35,9 @@ class Recipe(models.Model):
     class Meta:
         ordering = ['-created']
 
+    def __str__(self):
+        return self.name
+
 
 class Amount(models.Model):
     ingredient_id = models.ForeignKey('Ingredient', related_name='amounts',
@@ -55,12 +58,14 @@ class Tag(models.Model):
         unique=True
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(
         max_length=50,
-        verbose_name='Название',
-        unique=True
+        verbose_name='Название'
     )
     measurement_unit = models.CharField(
         max_length=50,
@@ -94,7 +99,7 @@ class ShoppingCart(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User,
                              related_name='shopping_сart',
-                             verbose_name='Подписчик',
+                             verbose_name='Покупатель',
                              on_delete=models.CASCADE
                              )
     recipe = models.ForeignKey(Recipe,
