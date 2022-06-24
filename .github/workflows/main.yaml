@@ -44,7 +44,9 @@ jobs:
           docker rm -f building_container
 
       - name: Tar frontend build and configs
-        run: tar -cvf deploy.tar ./frontend/build ./docs ./infra/docker-compose.yml ./infra/nginx.conf
+        run: |
+          tar -cvf deploy.tar ./frontend/build ./docs ./infra/docker-compose.yml ./infra/nginx.conf
+          ls
 
       - name: Login to Docker
         uses: docker/login-action@v2
@@ -60,7 +62,7 @@ jobs:
           file: ./backend/foodgram/Dockerfile
 
       - name: send_tar to deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
