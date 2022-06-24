@@ -13,8 +13,9 @@ class TestRecipe(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.author = User.objects.create_user(username='author')
-        Tag.objects.create(color='#FFFFFF', slug='slug1', name='ТЕГ1')
-        Tag.objects.create(color='#000000', slug='slug2', name='ТЕГ2')
+        Tag.objects.create(color='#FF0000', slug='breakfast', name='Затрак')
+        Tag.objects.create(color='#00FF00', slug='dinner', name='Обед')
+        Tag.objects.create(color='#00FF00', slug='supper', name='Ужин')
         Ingredient.objects.create(name='Картофель отварной',
                                   measurement_unit='г')
         Ingredient.objects.create(name='Капуста', measurement_unit='кг')
