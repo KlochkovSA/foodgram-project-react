@@ -48,6 +48,18 @@ jobs:
           tar -cvf deploy.tar ./frontend/build ./docs ./infra/docker-compose.yml ./infra/nginx.conf
           ls
 
+      - name: send_tar to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          port: 22
+          source: "deploy.tar"
+          target: "~"
+          overwrite: true
+
       - name: Login to Docker
         uses: docker/login-action@v2
         with:
@@ -61,17 +73,6 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram:v1
           file: ./backend/foodgram/Dockerfile
 
-      - name: send_tar to deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          port: 22
-          source: "deploy.tar"
-          target: "~"
-          overwrite: true
   deploy:
       runs-on: ubuntu-latest
       needs: build_and_push_to_docker_hub
