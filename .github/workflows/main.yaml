@@ -49,7 +49,7 @@ jobs:
           ls
 
       - name: send_tar to deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -93,8 +93,8 @@ jobs:
               
               rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
               
-              
               tar -xvf deploy.tar
+              ls
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:v1
               touch .env
               echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
