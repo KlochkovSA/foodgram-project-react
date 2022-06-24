@@ -62,12 +62,13 @@ jobs:
           file: ./backend/foodgram/Dockerfile
 
       - name: send_tar to deploy
-        uses: appleboy/ssh-action@v3
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+          port: 22
           source: "deploy.tar"
           target: "~"
           overwrite: true
