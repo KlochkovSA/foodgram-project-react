@@ -12,7 +12,7 @@ class Follow(models.Model):
                              on_delete=models.CASCADE
                              )
     author = models.ForeignKey(User,
-                               related_name='following',
+                               related_name='followers',
                                verbose_name='Автор',
                                on_delete=models.CASCADE
                                )
