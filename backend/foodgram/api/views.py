@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import (filters, generics, mixins, permissions, status,
+                            viewsets)
 from rest_framework.decorators import (api_view, permission_classes,
                                        renderer_classes)
 from rest_framework.response import Response
@@ -63,18 +64,37 @@ def subscribe(request, pk):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def list_subscriptions(request):
-    followers = request.user.follower.all()
-    authors = []
-    for follow_obj in followers:
-        author = follow_obj.author
-        authors.append(author)
-    serializer_context = {'request': request}
-    serializer = FollowSerializer(authors, many=True,
-                                  context=serializer_context)
-    return Response(serializer.data)
+class CreateDeleteSubscription(generics.CreateAPIView,
+                               mixins.DestroyModelMixin):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = FollowSerializer
+    queryset = Follow.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        user = request.user
+        author = get_object_or_404(User, pk=pk)
+        Follow.objects.create(user=user, author=author)
+        serializer_context = {'request': request}
+        serializer = FollowSerializer(author, context=serializer_context)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, **kwargs):
+        pk = kwargs.get('pk')
+        user = request.user
+        author = get_object_or_404(User, pk=pk)
+        follow = get_object_or_404(Follow, user=user, author=author)
+        follow.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListSubscriptions(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = FollowSerializer
+
+    def get_queryset(self):
+        followers = self.request.user.follower.all()
+        return User.objects.filter(followers__in=followers)
 
 
 @permission_classes([permissions.IsAuthenticated])
