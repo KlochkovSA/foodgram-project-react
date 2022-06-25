@@ -7,7 +7,7 @@ User = get_user_model()
 class Follow(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User,
-                             related_name='follower',
+                             related_name='follower_of',
                              verbose_name='Подписчик',
                              on_delete=models.CASCADE
                              )

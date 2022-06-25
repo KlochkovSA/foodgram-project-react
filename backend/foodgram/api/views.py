@@ -24,11 +24,13 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
+    pagination_class = None
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -93,7 +95,7 @@ class ListSubscriptions(generics.ListAPIView):
     serializer_class = FollowSerializer
 
     def get_queryset(self):
-        followers = self.request.user.follower.all()
+        followers = self.request.user.follower_of.all()
         return User.objects.filter(followers__in=followers)
 
 
