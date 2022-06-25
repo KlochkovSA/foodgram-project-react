@@ -88,8 +88,8 @@ jobs:
             script: |
               cd infra
               sudo docker compose stop
-              sudo docker compose rm {{ secrets.DOCKER_USERNAME }}/foodgram:v1
-              sudo docker volume prune
+              sudo docker compose rm web --force
+              sudo docker compose rmi {{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
               cd ..
               rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
               
@@ -105,7 +105,11 @@ jobs:
               echo DB_PORT=${{ secrets.DB_PORT }} >> .env
               echo DJANGO_KEY=${{ secrets.DJANGO_KEY }} >> .env
               echo HOST=${{ secrets.HOST }} >> .env
+              echo HOST=${{ secrets.DJANGO_SUPERUSER_EMAIL }} >> .env
+              echo HOST=${{ secrets.DJANGO_SUPERUSER_PASSWORD }} >> .env
+              echo HOST=${{ secrets.DJANGO_SUPERUSER_USERNAME }} >> .env
               cd infra
               sudo docker compose up -d
               sudo docker compose exec web python manage.py migrate
               sudo docker compose exec web python manage.py collectstatic --no-input
+              sudo docker compose exec web python manage.py createsuperuser --no-input
