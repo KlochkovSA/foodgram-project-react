@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import (filters, generics, mixins, permissions, status,
-                            viewsets)
+from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import (api_view, permission_classes,
                                        renderer_classes)
 from rest_framework.response import Response
@@ -34,7 +33,23 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Recipe.objects.select_related('author').all()
+        if user.is_anonymous:
+            return queryset
+        is_favorited = self.request.query_params.get('is_favorited')
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart'
+        )
+        author = self.request.query_params.get('author')
+        if is_favorited == 1:
+            queryset.filter(in_favorite__user=user)
+        if is_in_shopping_cart == 1:
+            queryset.filter(in_shopping_cart__user=user)
+        if author is not None:
+            queryset.filter(author=author)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'partial_update':
@@ -51,23 +66,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-@permission_classes([permissions.IsAuthenticated])
-@api_view(['POST', 'DELETE'])
-def subscribe(request, pk):
-    user = request.user
-    author = get_object_or_404(get_user_model(), pk=pk)
-    if request.method == 'POST':
-        Follow.objects.create(user=user, author=author)
-        serializer_context = {'request': request}
-        serializer = FollowSerializer(author, context=serializer_context)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    follow = get_object_or_404(Follow, user=user, author=author)
-    follow.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class CreateDeleteSubscription(generics.CreateAPIView,
-                               mixins.DestroyModelMixin):
+                               generics.DestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FollowSerializer
     queryset = Follow.objects.all()
@@ -91,12 +91,11 @@ class CreateDeleteSubscription(generics.CreateAPIView,
 
 
 class ListSubscriptions(generics.ListAPIView):
-    permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = FollowSerializer
 
     def get_queryset(self):
-        followers = self.request.user.follower_of.all()
-        return User.objects.filter(followers__in=followers)
+        return User.objects.filter(followers__user=self.request.user)
 
 
 @permission_classes([permissions.IsAuthenticated])

@@ -52,3 +52,7 @@ class TestRecipe(TestCase):
 
         self.assertEqual(Recipe.objects.count(), 1)
         self.assertEqual(Recipe.objects.get().cooking_time, 1)
+
+        response = self.client.get('/api/recipes/')
+        self.assertContains(response, 'is_favorited')
+        self.assertContains(response, 'is_in_shopping_cart')
