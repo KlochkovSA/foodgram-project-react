@@ -6,7 +6,7 @@ User = get_user_model()
 
 class Recipe(models.Model):
     name = models.CharField(
-        max_length=50,
+        max_length=200,
         verbose_name='Имя'
     )
     text = models.TextField(
@@ -48,12 +48,12 @@ class Amount(models.Model):
 
 
 class Tag(models.Model):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
     # length of hexadecimal color code is 6 + 1 (for # sign)
     # Example #FFFFFF -> White
     color = models.CharField(max_length=7)
     name = models.CharField(
-        max_length=50,
+        max_length=200,
         verbose_name='Тэг',
         unique=True
     )
@@ -79,12 +79,12 @@ class Ingredient(models.Model):
 class FavoriteRecipe(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User,
-                             related_name='favorite',
+                             related_name='favorite_recipes',
                              verbose_name='Пользователь',
                              on_delete=models.CASCADE
                              )
     recipe = models.ForeignKey(Recipe,
-                               related_name='following',
+                               related_name='in_favorite',
                                verbose_name='Рецепт',
                                on_delete=models.CASCADE
                                )
