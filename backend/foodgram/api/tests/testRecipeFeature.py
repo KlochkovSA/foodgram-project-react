@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
@@ -83,12 +85,12 @@ class TestRecipe(TestCase):
         data = {
             "ingredients": [
                 {
-                    "id": 1,
-                    "amount": 10
+                    "id": 2,
+                    "amount": 1
                 }
             ],
             "tags": [
-                1
+                3
             ],
             "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEA"
                      "AAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACX"
@@ -104,3 +106,18 @@ class TestRecipe(TestCase):
             format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Проверка ответа
+        self.assertEqual(3, response.data['tags'][0]['id'])
+        self.assertEqual(1, response.data['tags'].__len__())
+        self.assertEqual(2, response.data['ingredients'][0]['id'])
+        self.assertEqual(1, response.data['ingredients'][0]['amount'])
+        self.assertEqual(1, response.data['ingredients'].__len__())
+
+        # Проверка ответа при новом запросе
+        response = self.authorized_client.get(f'/api/recipes/{recipe.pk}/')
+        self.assertEqual(3, response.data['tags'][0]['id'])
+        self.assertEqual(1, response.data['tags'].__len__())
+        self.assertEqual(2, response.data['ingredients'][0]['id'])
+        self.assertEqual(1, response.data['ingredients'][0]['amount'])
+        self.assertEqual(1, response.data['ingredients'].__len__())
+
