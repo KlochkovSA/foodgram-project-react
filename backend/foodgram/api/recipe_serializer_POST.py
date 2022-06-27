@@ -30,6 +30,11 @@ class AmountSerializerPOST(serializers.ModelSerializer):
                                             queryset=Ingredient.objects.all()
                                             )
 
+    def validated_amount(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Убедитесь, что это значение больше либо равно 1.")
+
     class Meta:
         model = Amount
         fields = ('id', 'amount', 'ingredient_id')
@@ -49,6 +54,11 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
                   'author')
         read_only_fields = ('author',)
 
+    def validated_cooking_time(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "Убедитесь, что это значение больше либо равно 1.")
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         author = validated_data.pop('author')
@@ -59,19 +69,28 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
             Amount.objects.create(ingredient_id=ingredient['ingredient_id'],
                                   recipe_id=recipe,
                                   amount=ingredient['amount'])
-        for tag in tags:
-            recipe.tags.add(tag)
+        recipe.tags.set(tags)
         return recipe
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        instance.update(**validated_data)
+        image = validated_data.pop('image')
+        name = validated_data.pop('name')
+        text = validated_data.pop('text')
+        cooking_time = validated_data.pop('cooking_time')
+
+        instance.image = image
+        instance.name = name
+        instance.text = text
+        instance.cooking_time = cooking_time
+
+        instance.save()
+        Amount.objects.filter(recipe_id=instance).delete()
+
         for ingredient in ingredients:
-            obj = ingredient['ingredient_id']
-            Amount.objects.update_or_create(ingredient_id=obj,
-                                            recipe_id=instance,
-                                            amount=ingredient['amount'])
-        for tag in tags:
-            instance.tags.add(tag)
+            Amount.objects.create(ingredient_id=ingredient['ingredient_id'],
+                                  recipe_id=instance,
+                                  amount=ingredient['amount'])
+        instance.tags.set(tags)
         return instance

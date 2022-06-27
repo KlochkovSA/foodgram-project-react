@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import (api_view, permission_classes,
+from rest_framework.decorators import (action, api_view, permission_classes,
                                        renderer_classes)
 from rest_framework.response import Response
 
@@ -55,18 +55,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'partial_update':
+        if self.action == 'create' or self.action == 'edit':
             return RecipeSerializerPOST
         return RecipeSerializerGET
 
     def create(self, request, *args, **kwargs):
-        serializer = RecipeSerializerPOST(data=self.request.data)
+        serializer = RecipeSerializerPOST(data=request.data)
         serializer.is_valid(raise_exception=True)
         recipe = serializer.save(author=self.request.user)
         serializer_context = {'request': request}
         response_data = RecipeSerializerGET(recipe,
                                             context=serializer_context).data
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['patch'], detail=True)
+    def edit(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        recipe = serializer.save(author=self.request.user)
+        serializer_context = {'request': request}
+        response_data = RecipeSerializerGET(recipe,
+                                            context=serializer_context).data
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class CreateDeleteSubscription(generics.CreateAPIView,
