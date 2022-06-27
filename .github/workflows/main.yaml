@@ -89,7 +89,6 @@ jobs:
               cd infra
               sudo docker compose stop
               sudo docker rm infra-web-1 --force
-              sudo docker volume prune
               sudo docker rmi {{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
               cd ..
               sudo rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
@@ -113,4 +112,3 @@ jobs:
               sudo docker compose up -d
               sudo docker compose exec web python manage.py migrate
               sudo docker compose exec web python manage.py collectstatic --no-input
-              DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }} sudo docker compose exec web python manage.py createsuperuser --no-input --username ${{ secrets.DJANGO_SUPERUSER_USERNAME }} --email ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
