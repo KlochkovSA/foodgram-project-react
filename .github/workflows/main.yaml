@@ -88,7 +88,7 @@ jobs:
             script: |
               cd infra
               sudo docker compose stop
-              sudo docker compose rm web --force
+              sudo docker rm infra-web-1 --force
               sudo docker compose rmi {{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
               cd ..
               rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf

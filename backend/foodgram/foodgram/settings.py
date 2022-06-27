@@ -124,7 +124,7 @@ DJOSER = {
 }
 
 MEDIA_URL = '/api_media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'api_media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/api_static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'api_static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
