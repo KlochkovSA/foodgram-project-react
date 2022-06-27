@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
@@ -120,4 +118,3 @@ class TestRecipe(TestCase):
         self.assertEqual(2, response.data['ingredients'][0]['id'])
         self.assertEqual(1, response.data['ingredients'][0]['amount'])
         self.assertEqual(1, response.data['ingredients'].__len__())
-
