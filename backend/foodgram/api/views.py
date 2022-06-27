@@ -43,12 +43,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'is_in_shopping_cart'
         )
         author = self.request.query_params.get('author')
-        if is_favorited == 1:
-            queryset.filter(in_favorite__user=user)
-        if is_in_shopping_cart == 1:
-            queryset.filter(in_shopping_cart__user=user)
+        if is_favorited:
+            queryset = queryset.filter(in_favorite__user=user)
+        if is_in_shopping_cart:
+            queryset = queryset.filter(in_shopping_cart__user=user)
         if author is not None:
-            queryset.filter(author=author)
+            queryset = queryset.filter(author=author)
         return queryset
 
     def get_serializer_class(self):
