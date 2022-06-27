@@ -13,9 +13,12 @@ class TestRecipe(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.author = User.objects.create_user(username='author')
-        Tag.objects.create(color='#FF0000', slug='breakfast', name='Затрак')
-        Tag.objects.create(color='#00FF00', slug='dinner', name='Обед')
-        Tag.objects.create(color='#00FF00', slug='supper', name='Ужин')
+        cls.tag1 = Tag.objects.create(color='#FF0000', slug='breakfast',
+                                      name='Затрак')
+        cls.tag2 = Tag.objects.create(color='#00FF00', slug='dinner',
+                                      name='Обед')
+        cls.tag3 = Tag.objects.create(color='#00FF00', slug='supper',
+                                      name='Ужин')
         Ingredient.objects.create(name='Картофель отварной',
                                   measurement_unit='г')
         Ingredient.objects.create(name='Капуста', measurement_unit='кг')
@@ -35,8 +38,7 @@ class TestRecipe(TestCase):
                 }
             ],
             "tags": [
-                1,
-                2
+                1
             ],
             "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEA"
                      "AAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACX"
@@ -56,3 +58,23 @@ class TestRecipe(TestCase):
         response = self.client.get('/api/recipes/')
         self.assertContains(response, 'is_favorited')
         self.assertContains(response, 'is_in_shopping_cart')
+
+        recipe = Recipe.objects.create(name='Рецепт 1', text='Описание',
+                                       cooking_time=10,
+                                       author=self.author)
+        recipe.tags.add(self.tag3)
+
+        response = self.authorized_client.get(
+            f'/api/recipes/?tags={self.tag3.slug}')
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.authorized_client.get(
+            f'/api/recipes/?tags={self.tag1.slug}&tags={self.tag3.slug}')
+        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.authorized_client.get(
+            f'/api/recipes/?author={self.author.pk}&tags={self.tag2.slug}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 0)

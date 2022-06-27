@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import (api_view, permission_classes,
                                        renderer_classes)
@@ -9,6 +10,7 @@ from recepts.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from users.models import Follow
 
+from .filters import RecipeFilter
 from .followSerializer import FollowSerializer
 from .recipe_serializer_GET import RecipeSerializerGET
 from .recipe_serializer_POST import RecipeSerializerPOST
@@ -33,6 +35,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.select_related('author').all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = RecipeFilter
+
     def get_queryset(self):
         user = self.request.user
         queryset = Recipe.objects.select_related('author').all()
@@ -42,13 +48,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart'
         )
-        author = self.request.query_params.get('author')
         if is_favorited:
             queryset = queryset.filter(in_favorite__user=user)
         if is_in_shopping_cart:
-            queryset = queryset.filter(in_shopping_cart__user=user)
-        if author is not None:
-            return queryset.filter(author=author)
+            return queryset.filter(in_shopping_cart__user=user)
         return queryset
 
     def get_serializer_class(self):
