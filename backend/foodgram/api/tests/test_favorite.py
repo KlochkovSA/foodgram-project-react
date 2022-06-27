@@ -40,7 +40,7 @@ class TestFavorite(APITestCase):
         self.assertContains(response, 'cooking_time',
                             status_code=status.HTTP_201_CREATED)
 
-        response = self.authorized_client.get(f'/api/recipes/?is_favorited=1')
+        response = self.authorized_client.get('/api/recipes/?is_favorited=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
 
