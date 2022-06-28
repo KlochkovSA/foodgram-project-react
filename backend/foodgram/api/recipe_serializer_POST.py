@@ -30,7 +30,7 @@ class AmountSerializerPOST(serializers.ModelSerializer):
                                             queryset=Ingredient.objects.all()
                                             )
 
-    def validated_amount(self, value):
+    def validate_amount(self, value):
         if value < 1:
             raise serializers.ValidationError(
                 "Убедитесь, что это значение больше либо равно 1.")
@@ -54,7 +54,7 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
                   'author')
         read_only_fields = ('author',)
 
-    def validated_cooking_time(self, value):
+    def validate_cooking_time(self, value):
         if value < 1:
             raise serializers.ValidationError(
                 "Убедитесь, что это значение больше либо равно 1.")
