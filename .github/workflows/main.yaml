@@ -90,7 +90,7 @@ jobs:
               sudo docker compose stop
               sudo docker rm infra-web-1 --force
               sudo docker rmi {{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
-              sudo docker volume prune
+              sudo docker volume prune --force
               cd ..
               sudo rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
               
