@@ -89,7 +89,7 @@ jobs:
               cd infra
               sudo docker compose stop
               sudo docker compose rm --force
-              sudo docker rmi {{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
+              sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
               sudo docker volume prune --force
               cd ..
               sudo rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
@@ -114,4 +114,4 @@ jobs:
               sudo docker compose exec web python manage.py migrate
               sudo docker compose exec web python manage.py collectstatic --no-input
               sudo docker compose exec web ls /app/static/
-              sudo docker compose exec nginx ls /usr/share/nginx/html/api/static/
+              sudo docker compose exec nginx ls /usr/share/nginx/html/api/api_static/
