@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from recepts.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from users.models import Follow
-
 from .filters import RecipeFilter
 from .followSerializer import FollowSerializer
 from .recipe_serializer_GET import RecipeSerializerGET

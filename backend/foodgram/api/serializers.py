@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from recepts.models import Ingredient, Recipe, Tag
-
 from .recipe_serializer_POST import IngredientSerializerPOST
 
 

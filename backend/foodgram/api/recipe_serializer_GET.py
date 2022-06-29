@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from recepts.models import Amount, Ingredient, Recipe
 from users.serializers import UserGetSerializer
-
 from .serializers import TagSerializer
 
 
