@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import (action, api_view, permission_classes,
+from rest_framework.decorators import (api_view, permission_classes,
                                        renderer_classes)
 from rest_framework.response import Response
 
@@ -38,6 +38,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related('author').all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         user = self.request.user
@@ -55,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'edit':
+        if self.action == 'create' or self.action == 'partial_update':
             return RecipeSerializerPOST
         return RecipeSerializerGET
 
@@ -68,8 +69,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                             context=serializer_context).data
         return Response(response_data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['patch'], detail=True)
-    def edit(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -113,42 +113,33 @@ class ListSubscriptions(generics.ListAPIView):
         return User.objects.filter(followers__user=self.request.user)
 
 
+def create_or_delete(model, request, pk):
+    user = request.user
+    recipe = get_object_or_404(Recipe, pk=pk)
+    flag = model.objects.filter(user=user,
+                                recipe=recipe).exists()
+    if request.method == 'POST' and not flag:
+        model.objects.create(user=user, recipe=recipe)
+        serializer = RecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    elif request.method == 'DELETE' and flag:
+        item = get_object_or_404(model, user=user,
+                                 recipe=recipe)
+        item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 @permission_classes([permissions.IsAuthenticated])
 @api_view(['POST', 'DELETE'])
 def favorite(request, pk):
-    user = request.user
-    recipe = get_object_or_404(Recipe, pk=pk)
-    is_favourite_recipe = FavoriteRecipe.objects.filter(user=user,
-                                                        recipe=recipe).exists()
-    if request.method == 'POST' and not is_favourite_recipe:
-        FavoriteRecipe.objects.create(user=user, recipe=recipe)
-        serializer = RecipeSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    elif request.method == 'DELETE' and is_favourite_recipe:
-        favorite_recipe = get_object_or_404(FavoriteRecipe, user=user,
-                                            recipe=recipe)
-        favorite_recipe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    return create_or_delete(FavoriteRecipe, request, pk)
 
 
 @permission_classes([permissions.IsAuthenticated])
 @api_view(['POST', 'DELETE'])
 def shopping_cart(request, pk):
-    user = request.user
-    recipe = get_object_or_404(Recipe, pk=pk)
-    is_in_shopping_cart = ShoppingCart.objects.filter(user=user,
-                                                      recipe=recipe).exists()
-    if request.method == 'POST' and not is_in_shopping_cart:
-        ShoppingCart.objects.create(user=user, recipe=recipe)
-        serializer = RecipeSerializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    elif request.method == 'DELETE' and is_in_shopping_cart:
-        favorite_recipe = get_object_or_404(ShoppingCart, user=user,
-                                            recipe=recipe)
-        favorite_recipe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    return create_or_delete(ShoppingCart, request, pk)
 
 
 @api_view(['GET'])

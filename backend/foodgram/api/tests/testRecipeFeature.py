@@ -99,7 +99,7 @@ class TestRecipe(TestCase):
             "cooking_time": 1
         }
         response = self.authorized_client.patch(
-            f'/api/recipes/{recipe.pk}/edit/',
+            f'/api/recipes/{recipe.pk}/',
             data=data,
             format='json')
 

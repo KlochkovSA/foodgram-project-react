@@ -90,7 +90,6 @@ jobs:
               sudo docker compose stop
               sudo docker compose rm --force
               sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram:v1 --force
-              sudo docker volume prune --force
               cd ..
               sudo rm -rf .env frontend/build docs infra/docker-compose.yml infra/nginx.conf
               
@@ -106,12 +105,6 @@ jobs:
               echo DB_PORT=${{ secrets.DB_PORT }} >> .env
               echo DJANGO_KEY=${{ secrets.DJANGO_KEY }} >> .env
               echo HOST=${{ secrets.HOST }} >> .env
-              echo HOST=${{ secrets.DJANGO_SUPERUSER_EMAIL }} >> .env
-              echo HOST=${{ secrets.DJANGO_SUPERUSER_PASSWORD }} >> .env
-              echo HOST=${{ secrets.DJANGO_SUPERUSER_USERNAME }} >> .env
               cd infra
               sudo docker compose up -d
-              sudo docker compose exec web python manage.py migrate
               sudo docker compose exec web python manage.py collectstatic --no-input
-              sudo docker compose exec web ls /app/static/
-              sudo docker compose exec nginx ls /usr/share/nginx/html/api/api_static/

@@ -34,6 +34,7 @@ class AmountSerializerPOST(serializers.ModelSerializer):
         if value < 1:
             raise serializers.ValidationError(
                 "Убедитесь, что это значение больше либо равно 1.")
+        return value
 
     class Meta:
         model = Amount
@@ -58,6 +59,7 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
         if value < 1:
             raise serializers.ValidationError(
                 "Убедитесь, что это значение больше либо равно 1.")
+        return value
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -75,15 +77,10 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        image = validated_data.pop('image')
-        name = validated_data.pop('name')
-        text = validated_data.pop('text')
-        cooking_time = validated_data.pop('cooking_time')
-
-        instance.image = image
-        instance.name = name
-        instance.text = text
-        instance.cooking_time = cooking_time
+        instance.image = validated_data.pop('image')
+        instance.name = validated_data.pop('name')
+        instance.text = validated_data.pop('text')
+        instance.cooking_time = validated_data.pop('cooking_time')
 
         instance.save()
         Amount.objects.filter(recipe_id=instance).delete()
