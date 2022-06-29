@@ -30,5 +30,9 @@ class Follow(models.Model):
                 condition=~models.Q(user=models.F('author')),
                 name='no_self_subscription'
             ),
+            models.UniqueConstraint(
+                fields=['author', 'user'],
+                name='unique_subscription'
+            )
         ]
         ordering = ['-created']
