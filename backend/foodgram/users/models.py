@@ -36,3 +36,5 @@ class Follow(models.Model):
             )
         ]
         ordering = ['-created']
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'

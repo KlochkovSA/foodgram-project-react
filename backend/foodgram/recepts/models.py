@@ -27,13 +27,21 @@ class Recipe(models.Model):
                                on_delete=models.CASCADE
                                )
     tags = models.ManyToManyField(to='Tag', db_table='RecipeTag',
+                                  verbose_name='Тэги',
                                   related_name='recipes')
     ingredients = models.ManyToManyField(to='Ingredient', through='Amount',
+                                         verbose_name='Ингредиенты',
                                          related_name='recipes')
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        models.UniqueConstraint(
+            fields=['author', 'name'],
+            name='unique_recipe_name'
+        )
         ordering = ['-created']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
     def __str__(self):
         return self.name
@@ -45,6 +53,10 @@ class Amount(models.Model):
     recipe_id = models.ForeignKey('Recipe', related_name='amounts',
                                   on_delete=models.CASCADE)
     amount = models.IntegerField(verbose_name='Количество')
+
+    class Meta:
+        verbose_name = 'Количество'
+        verbose_name_plural = 'Количества ингредиентов'
 
 
 class Tag(models.Model):
@@ -61,6 +73,10 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+
 
 class Ingredient(models.Model):
     name = models.CharField(
@@ -74,6 +90,10 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
 
 class FavoriteRecipe(models.Model):
@@ -91,8 +111,15 @@ class FavoriteRecipe(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['user', 'recipe']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_recipe'
+            )
+        ]
         ordering = ['-created']
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
 
 
 class ShoppingCart(models.Model):
@@ -110,5 +137,12 @@ class ShoppingCart(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['user', 'recipe']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_recipe_in_cart'
+            )
+        ]
         ordering = ['-created']
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
