@@ -51,6 +51,11 @@ class TestRecipe(TestCase):
         response = self.authorized_client.post('/api/recipes/', data=data,
                                                format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(1, response.data['tags'][0]['id'])
+        self.assertEqual(1, response.data['tags'].__len__())
+        self.assertEqual(1, response.data['ingredients'][0]['id'])
+        self.assertEqual(10, response.data['ingredients'][0]['amount'])
+        self.assertEqual(1, response.data['ingredients'].__len__())
 
         self.assertEqual(Recipe.objects.count(), 1)
         recipe = Recipe.objects.get()

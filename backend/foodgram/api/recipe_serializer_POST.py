@@ -3,7 +3,8 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recepts.models import Amount, Ingredient, Recipe, Tag
+from recipes.models import Amount, Ingredient, Recipe, Tag
+from .validators import validate_amount, validate_cooking_time
 
 
 class Base64ToImage(serializers.Field):
@@ -17,28 +18,28 @@ class Base64ToImage(serializers.Field):
         return ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
 
-class IngredientSerializerPOST(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = ('id',)
-
-
 class AmountSerializerPOST(serializers.ModelSerializer):
-    ingredient_id = IngredientSerializerPOST(read_only=True)
     id = serializers.PrimaryKeyRelatedField(write_only=True,
                                             source='ingredient_id',
                                             queryset=Ingredient.objects.all()
                                             )
-
-    def validate_amount(self, value):
-        if value < 1:
-            raise serializers.ValidationError(
-                "Убедитесь, что это значение больше либо равно 1.")
-        return value
+    amount = serializers.IntegerField(validators=[validate_amount])
 
     class Meta:
         model = Amount
-        fields = ('id', 'amount', 'ingredient_id')
+        fields = ('id', 'amount')
+
+
+def set_amounts_tags(recipe, ingredients, tags):
+    Amount.objects.bulk_create(
+        [Amount(
+            recipe_id=recipe,
+            ingredient_id=ingredient['ingredient_id'],
+            amount=ingredient['amount'])
+            for ingredient in ingredients]
+    )
+    recipe.tags.set(tags)
+    return recipe
 
 
 class RecipeSerializerPOST(serializers.ModelSerializer):
@@ -46,6 +47,7 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all()
                                               )
+    cooking_time = serializers.IntegerField(validators=[validate_cooking_time])
     image = Base64ToImage()
 
     class Meta:
@@ -55,10 +57,26 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
                   'author')
         read_only_fields = ('author',)
 
-    def validate_cooking_time(self, value):
-        if value < 1:
-            raise serializers.ValidationError(
-                "Убедитесь, что это значение больше либо равно 1.")
+    def validate_ingredients(self, value):
+        if len(value) < 1:
+            raise serializers.ValidationError('Нет ингредиентов в рецепте')
+        recipe_ingredients = set()
+        for ingredient in value:
+            if ingredient['ingredient_id'] in recipe_ingredients:
+                raise serializers.ValidationError(
+                    'Ингредиент повторяется в рецепте')
+            recipe_ingredients.add(ingredient['ingredient_id'])
+        return value
+
+    def validate_tags(self, value):
+        if len(value) < 1:
+            raise serializers.ValidationError('Рецепт должен иметь тэг')
+        tags = set()
+        for tag in value:
+            if tag in tags:
+                raise serializers.ValidationError(
+                    'Теги не должны повторяться')
+            tags.add(tag)
         return value
 
     def create(self, validated_data):
@@ -67,12 +85,7 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
 
         recipe = Recipe.objects.create(author=author, **validated_data)
-        for ingredient in ingredients:
-            Amount.objects.create(ingredient_id=ingredient['ingredient_id'],
-                                  recipe_id=recipe,
-                                  amount=ingredient['amount'])
-        recipe.tags.set(tags)
-        return recipe
+        return set_amounts_tags(recipe, ingredients, tags)
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -84,10 +97,5 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
 
         instance.save()
         Amount.objects.filter(recipe_id=instance).delete()
-
-        for ingredient in ingredients:
-            Amount.objects.create(ingredient_id=ingredient['ingredient_id'],
-                                  recipe_id=instance,
-                                  amount=ingredient['amount'])
-        instance.tags.set(tags)
-        return instance
+        return set_amounts_tags(recipe=instance, ingredients=ingredients,
+                                tags=tags)

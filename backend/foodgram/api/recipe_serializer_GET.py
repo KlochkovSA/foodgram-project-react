@@ -1,19 +1,16 @@
 from rest_framework import serializers
 
-from recepts.models import Amount, Ingredient, Recipe
+from recipes.models import Amount, Ingredient, Recipe
 from users.serializers import UserGetSerializer
 from .serializers import TagSerializer
 
 
 class AmountIngredientSerializer(serializers.ModelSerializer):
-    amount = serializers.SerializerMethodField()
+    amount = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
-
-    def get_amount(self, obj):
-        return obj.amount
 
 
 class RecipeSerializerGET(serializers.ModelSerializer):
