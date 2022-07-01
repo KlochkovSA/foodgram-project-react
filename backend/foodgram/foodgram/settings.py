@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework.authtoken',
     'djoser',
-    'recepts',
+    'recipes',
     'api',
     'users'
 ]
@@ -87,9 +87,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ru-RU'
+TIME_ZONE = 'Asia/Tbilisi'
 
 USE_I18N = True
 
@@ -128,3 +127,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/api_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+FOLLOW_SERIALIZER_RECIPES_LIMIT = 5
