@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from rest_framework import status
 
-from recepts.models import Ingredient, Tag
+from recipes.models import Ingredient, Tag
 
 TAG = {
     'name': 'Завтрак',
