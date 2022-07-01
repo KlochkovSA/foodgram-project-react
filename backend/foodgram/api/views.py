@@ -6,7 +6,7 @@ from rest_framework.decorators import (api_view, permission_classes,
                                        renderer_classes)
 from rest_framework.response import Response
 
-from recepts.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from users.models import Follow
 from .filters import RecipeFilter
@@ -121,7 +121,7 @@ def create_or_delete(model, request, pk):
         model.objects.create(user=user, recipe=recipe)
         serializer = RecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    elif request.method == 'DELETE' and flag:
+    if request.method == 'DELETE' and flag:
         item = get_object_or_404(model, user=user,
                                  recipe=recipe)
         item.delete()
