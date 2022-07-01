@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import (api_view, permission_classes,
-                                       renderer_classes)
+from rest_framework.decorators import (api_view, permission_classes)
 from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
@@ -13,7 +12,7 @@ from .filters import RecipeFilter
 from .followSerializer import FollowSerializer
 from .recipe_serializer_GET import RecipeSerializerGET
 from .recipe_serializer_POST import RecipeSerializerPOST
-from .renderer import TextRenderer
+
 from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
 
 User = get_user_model()
@@ -139,30 +138,3 @@ def favorite(request, pk):
 @api_view(['POST', 'DELETE'])
 def shopping_cart(request, pk):
     return create_or_delete(ShoppingCart, request, pk)
-
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-@renderer_classes([TextRenderer])
-def download_shopping_cart(request):
-    user = request.user
-    shopping_cart = ShoppingCart.objects.filter(user=user).all()
-    result_dict = {}
-    for item in shopping_cart:
-        for ingredient_amount in item.recipe.amounts.all():
-            ingredient_id = ingredient_amount.ingredient_id
-            # ingredient_id gives us string representation
-            # of Ingredient model object
-            key = f'{ingredient_id} ({ingredient_id.measurement_unit})'
-            # Фарш (баранина и говядина) (г) — 600
-            # if hasattr(result, key):
-            if key in result_dict:
-                result_dict[key] += ingredient_amount.amount
-                continue
-            result_dict[key] = ingredient_amount.amount
-    result = ''.join([f'{k} - {v}\n' for k, v in result_dict.items()])
-    return Response(result,
-                    headers={'Content-Disposition':
-                             'attachment; filename="file.txt"'},
-                    status=status.HTTP_200_OK,
-                    content_type='text/plain')

@@ -3,7 +3,8 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (CreateDeleteSubscription, IngredientViewSet,
                     ListSubscriptions, RecipeViewSet, TagViewSet,
-                    download_shopping_cart, favorite, shopping_cart)
+                    favorite, shopping_cart)
+from .utils import download_shopping_cart
 
 app_name = 'api'
 
