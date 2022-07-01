@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from recepts.models import Recipe
+from recipes.models import Recipe
 from users.models import Follow
 
 User = get_user_model()
