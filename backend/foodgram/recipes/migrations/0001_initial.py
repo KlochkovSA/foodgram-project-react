@@ -48,8 +48,8 @@ class Migration(migrations.Migration):
                 ('cooking_time', models.IntegerField(verbose_name='Время приготовления в минутах')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор')),
-                ('ingredients', models.ManyToManyField(related_name='recipes', through='recepts.Amount', to='recepts.ingredient')),
-                ('tags', models.ManyToManyField(db_table='RecipeTag', related_name='recipes', to='recepts.tag')),
+                ('ingredients', models.ManyToManyField(related_name='recipes', through='recipes.Amount', to='recipes.ingredient')),
+                ('tags', models.ManyToManyField(db_table='RecipeTag', related_name='recipes', to='recipes.tag')),
             ],
             options={
                 'ordering': ['-created'],
@@ -58,19 +58,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='amount',
             name='ingredient_id',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='amounts', to='recepts.ingredient'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='amounts', to='recipes.ingredient'),
         ),
         migrations.AddField(
             model_name='amount',
             name='recipe_id',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='amounts', to='recepts.recipe'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='amounts', to='recipes.recipe'),
         ),
         migrations.CreateModel(
             name='ShoppingCart',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_shopping_cart', to='recepts.recipe', verbose_name='Рецепт')),
+                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_shopping_cart', to='recipes.recipe', verbose_name='Рецепт')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_сart', to=settings.AUTH_USER_MODEL, verbose_name='Покупатель')),
             ],
             options={
@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_favorite', to='recepts.recipe', verbose_name='Рецепт')),
+                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='in_favorite', to='recipes.recipe', verbose_name='Рецепт')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorite_recipes', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь')),
             ],
             options={
