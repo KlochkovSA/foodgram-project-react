@@ -103,6 +103,14 @@ class TestRecipe(TestCase):
             "text": "большой пирог",
             "cooking_time": 1
         }
+
+        response = self.authorized_client.put(
+            f'/api/recipes/{recipe.pk}/',
+            data=data,
+            format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
         response = self.authorized_client.patch(
             f'/api/recipes/{recipe.pk}/',
             data=data,

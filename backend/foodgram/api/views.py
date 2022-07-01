@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import (api_view, permission_classes)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
@@ -12,7 +12,6 @@ from .filters import RecipeFilter
 from .followSerializer import FollowSerializer
 from .recipe_serializer_GET import RecipeSerializerGET
 from .recipe_serializer_POST import RecipeSerializerPOST
-
 from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
 
 User = get_user_model()
@@ -36,7 +35,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related('author').all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    # http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         user = self.request.user
@@ -68,6 +67,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
+        if self.request.stream.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -77,6 +78,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response_data = RecipeSerializerGET(recipe,
                                             context=serializer_context).data
         return Response(response_data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
 
 class CreateDeleteSubscription(generics.CreateAPIView,
