@@ -35,9 +35,11 @@ class Recipe(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        models.UniqueConstraint(
-            fields=['author', 'name'],
-            name='unique_recipe_name'
+        constraints = (
+            models.UniqueConstraint(
+                fields=['author', 'name'],
+                name='unique_recipe_name'
+            ),
         )
         ordering = ['-created']
         verbose_name = 'Рецепт'
