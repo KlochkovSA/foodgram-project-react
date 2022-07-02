@@ -35,7 +35,7 @@ sudo docker build -f ../backend/foodgram/Dockerfile -t klochkovsa/foodgram:v1 ..
 sudo docker compose -f infra/docker-compose.yml up -d
 sudo docker compose -f infra/docker-compose.yml exec web python manage.py collectstatic --noinput
 sudo docker compose -f infra/docker-compose.yml exec web python manage.py migrate
-sudo docker compose -f infra/docker-compose.yml exec web python manage.py create superuser
+sudo docker compose -f infra/docker-compose.yml exec web python manage.py createsuperuser
 ```
 
 Notes:
