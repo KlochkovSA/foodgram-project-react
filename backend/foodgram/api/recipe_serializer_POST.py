@@ -60,18 +60,23 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
     def validate_ingredients(self, value):
         if len(value) < 1:
             raise serializers.ValidationError('Нет ингредиентов в рецепте')
-        recipe_ingredients = set(value)
-        if len(value) != len(recipe_ingredients):
-            raise serializers.ValidationError(
-                'Ингредиент повторяется в рецепте')
+        recipe_ingredients = set()
+        for ingredient in value:
+            if ingredient['ingredient_id'] in recipe_ingredients:
+                raise serializers.ValidationError(
+                    'Ингредиент повторяется в рецепте')
+            recipe_ingredients.add(ingredient['ingredient_id'])
         return value
 
     def validate_tags(self, value):
         if len(value) < 1:
             raise serializers.ValidationError('Рецепт должен иметь тэг')
-        tags = set(value)
-        if len(tags) != len(value):
-            raise serializers.ValidationError('Теги не должны повторяться')
+        tags = set()
+        for tag in value:
+            if tag in tags:
+                raise serializers.ValidationError(
+                    'Теги не должны повторяться')
+            tags.add(tag)
         return value
 
     def create(self, validated_data):
