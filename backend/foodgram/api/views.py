@@ -35,7 +35,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related('author').all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
-    # http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         user = self.request.user
