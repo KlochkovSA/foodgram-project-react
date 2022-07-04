@@ -59,7 +59,12 @@ class Amount(models.Model):
     class Meta:
         verbose_name = 'Количество'
         verbose_name_plural = 'Количества ингредиентов'
-
+        constraints = (
+            models.UniqueConstraint(
+                fields=['recipe_id', 'ingredient_id'],
+                name='unique_ingredient'
+            ),
+        )
 
 class Tag(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
