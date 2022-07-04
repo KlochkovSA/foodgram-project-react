@@ -66,6 +66,7 @@ class Amount(models.Model):
             ),
         )
 
+
 class Tag(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
     # length of hexadecimal color code is 6 + 1 (for # sign)
