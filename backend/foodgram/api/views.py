@@ -1,14 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework.backends import DjangoFilterBackend
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Tag)
 from users.models import Follow
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .followSerializer import FollowSerializer
 from .recipe_serializer_GET import RecipeSerializerGET
 from .recipe_serializer_POST import RecipeSerializerPOST
@@ -18,15 +18,11 @@ User = get_user_model()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-
-    def get_queryset(self):
-        queryset = Ingredient.objects.all()
-        name = self.request.query_params.get('name')
-        if name is not None:
-            queryset = queryset.filter(name__istartswith=name)
-        return queryset
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
