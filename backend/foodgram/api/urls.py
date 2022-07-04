@@ -9,7 +9,7 @@ from .views import (CreateDeleteSubscription, IngredientViewSet,
 app_name = 'api'
 
 router = SimpleRouter()
-router.register('ingredients', IngredientViewSet)
+router.register('ingredients', IngredientViewSet, basename='ingredients')
 router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet, basename='recipes')
 
