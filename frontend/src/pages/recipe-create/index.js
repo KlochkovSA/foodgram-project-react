@@ -95,6 +95,9 @@ const RecipeCreate = ({ onEdit }) => {
             }
             if (ingredients) {
               return alert(`Ингредиенты: ${ingredients.filter(item => Object.keys(item).length).map(item => {
+                if (item == "Ингредиент повторяется в рецепте") {
+                    return item;
+                }
                 const error = item[Object.keys(item)[0]]
                 return error && error.join(' ,')
               })[0]}`)
