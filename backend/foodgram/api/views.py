@@ -69,7 +69,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.stream.method == 'PUT':
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=partial)
         serializer.is_valid(raise_exception=True)
 
         recipe = serializer.save(author=self.request.user)

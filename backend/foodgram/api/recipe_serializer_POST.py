@@ -88,9 +88,11 @@ class RecipeSerializerPOST(serializers.ModelSerializer):
         return set_amounts_tags(recipe, ingredients, tags)
 
     def update(self, instance, validated_data):
+        image = validated_data.get('image', None)
+        if image is not None:
+            instance.image = image
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        instance.image = validated_data.pop('image')
         instance.name = validated_data.pop('name')
         instance.text = validated_data.pop('text')
         instance.cooking_time = validated_data.pop('cooking_time')
