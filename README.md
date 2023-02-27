@@ -38,13 +38,14 @@ sudo docker compose -f infra/docker-compose.yml exec web python manage.py migrat
 sudo docker compose -f infra/docker-compose.yml exec web python manage.py createsuperuser
 ```
 
-Notes:
-An the moment the service is available at
-[klochkovsa.sytes.net]((http://http://klochkovsa.sytes.net))
+GitHub CI/CD 
+There is a github actions workflow in the hidden folder ".github/workflows/main.yaml". 
+It was developed to test and deploy the application to yandex cloud server (Currently unavailable).
+Stages:
+- tests: The GitHub provides linux enviroment, which allowed to run the tests (PEP8, Django tests)
+- build: Builds the docker container from the sourcecode and uploads it to the DockerHub
+- deploy: Connects to remote server (yandex cloud) via SSH for dowloading the docker container with updated application
 
-admin_login = root
-
-admin_password = practicum
 
 # Authors
 ### Frontend - @yandex-praktikum
